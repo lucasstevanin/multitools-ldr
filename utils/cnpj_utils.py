@@ -32,8 +32,7 @@ def normalizar_texto(texto):
 def formatar_cnpj(cnpj):
     cnpj_numeros = re.sub(r'\D', '', cnpj)
     if len(cnpj_numeros) == 14:
-        # rejeita bases diferentes de 0001
-        if cnpj_numeros[8:12] != "0001":
+        if cnpj_numeros[8:12] not in ("0001", "0002", "0003"):
             return ""
         return (
             f"{cnpj_numeros[:2]}.{cnpj_numeros[2:5]}."
@@ -48,9 +47,8 @@ def extrair_cnpj_texto(texto):
         primeiro = cnpjs[0]
         # Ignora CNPJ "00.000.000/0000-00"
         if primeiro != "00.000.000/0000-00":
-            # rejeita base diferente de 0001 (XX.XXX.XXX/BBBB-YY)
             base = primeiro[12:16]
-            if base == "0001":
+            if base in ("0001", "0002", "0003"):
                 return primeiro
 
     for cnpj in re.findall(PADRAO_CNPJ_SEM_FORMATACAO, texto):
@@ -60,9 +58,11 @@ def extrair_cnpj_texto(texto):
         # Ignora explicitamente 00000000000000
         if cnpj == "00000000000000":
             continue
-        # rejeita base diferente de 0001
-        if cnpj[8:12] != "0001":
+        
+        # Só aceita base 0001, 0002 ou 0003
+        if cnpj[8:12] not in ("0001", "0002", "0003"):
             continue
+
         fmt = formatar_cnpj(cnpj)
         if fmt:
             return fmt
